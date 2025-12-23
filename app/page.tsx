@@ -65,7 +65,7 @@ export default function SniperZombieGame() {
   const [viewportHeight, setViewportHeight] = useState(0);
 
   // Refs
-  const valueRef = useRef(GAME_CONFIG.START_VALUE);
+  const bulletRef = useRef(GAME_CONFIG.START_VALUE);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
   const loopRef = useRef<(currentTime: number) => void>(() => {});
@@ -119,31 +119,63 @@ export default function SniperZombieGame() {
     setTimeout(() => setShowModal(true), GAME_CONFIG.MODAL_DELAY_MS);
   }, [stopLoop]);
 
-  // 게임 루프 (delta 시간 기반)
+  // 시간 계산
+  const calculateDeltaTime = useCallback((currentTime: number): number => {
+    if (lastTimeRef.current === null) {
+      lastTimeRef.current = currentTime;
+      return 0;
+    }
+    const deltaTime = (currentTime - lastTimeRef.current) / 1000;
+    lastTimeRef.current = currentTime;
+    return deltaTime;
+  }, []);
+
+  // 이동 계산
+  const updateBulletPosition = useCallback((deltaTime: number): number => {
+    const decay = GAME_CONFIG.DECAY_PER_SEC * deltaTime;
+    const next = bulletRef.current + decay;
+    bulletRef.current = next;
+    setBulletPosition(next);
+    return next;
+  }, []);
+
+  // 실패 판정
+  const checkGameOver = useCallback(
+    (position: number): boolean => {
+      if (position >= GAME_CONFIG.AUTO_FAIL_METERS) {
+        bulletRef.current = GAME_CONFIG.AUTO_FAIL_METERS;
+        setBulletPosition(GAME_CONFIG.AUTO_FAIL_METERS);
+        failGame();
+        return true;
+      }
+      return false;
+    },
+    [failGame]
+  );
+
+  // RAF 재귀 호출
+  const scheduleNextFrame = useCallback(() => {
+    rafRef.current = requestAnimationFrame(loopRef.current);
+  }, []);
+
+  // 게임 루프 (책임 분리)
   const loop = useCallback(
     (currentTime: number) => {
-      if (lastTimeRef.current === null) {
-        lastTimeRef.current = currentTime;
-      }
-
-      const deltaTime = (currentTime - lastTimeRef.current) / 1000;
-      lastTimeRef.current = currentTime;
-      const decay = GAME_CONFIG.DECAY_PER_SEC * deltaTime;
-      const next = valueRef.current + decay;
-
-      if (next >= GAME_CONFIG.AUTO_FAIL_METERS) {
-        valueRef.current = GAME_CONFIG.AUTO_FAIL_METERS;
-        setBulletPosition(GAME_CONFIG.AUTO_FAIL_METERS);
-        console.log(`next: ${next}`);
-        failGame();
+      const deltaTime = calculateDeltaTime(currentTime);
+      if (deltaTime === 0) {
+        scheduleNextFrame();
         return;
       }
 
-      valueRef.current = next;
-      setBulletPosition(next);
-      rafRef.current = requestAnimationFrame(loopRef.current);
+      const newPosition = updateBulletPosition(deltaTime);
+
+      if (checkGameOver(newPosition)) {
+        return;
+      }
+
+      scheduleNextFrame();
     },
-    [failGame]
+    [calculateDeltaTime, updateBulletPosition, checkGameOver, scheduleNextFrame]
   );
 
   useEffect(() => {
@@ -159,7 +191,7 @@ export default function SniperZombieGame() {
 
   const initializeGame = useCallback(() => {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
-    valueRef.current = GAME_CONFIG.START_VALUE;
+    bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
   }, []);
 
@@ -212,10 +244,7 @@ export default function SniperZombieGame() {
   }, [gameState]);
 
   // 백그라운드 X 오프셋 계산
-  const backgroundTranslateX = useMemo(
-    () => -(GAME_CONFIG.START_VALUE + bulletPosition),
-    [bulletPosition]
-  );
+  const backgroundTranslateX = useMemo(() => -bulletPosition, [bulletPosition]);
 
   return (
     <>
