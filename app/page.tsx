@@ -57,7 +57,6 @@ export default function SniperZombieGame() {
   // 게임 상태
   const [gameState, setGameState] = useState<GameState>("ready");
   const [bulletPosition, setBulletPosition] = useState(GAME_CONFIG.START_VALUE);
-  const [isRunning, setIsRunning] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [targetZombiePosition, setTargetZombiePosition] = useState(
     GAME_CONFIG.FINISH_LINE_MIN
@@ -114,7 +113,6 @@ export default function SniperZombieGame() {
 
   const failGame = useCallback(() => {
     stopLoop();
-    setIsRunning(false);
     setGameState("failed");
     setTimeout(() => setShowModal(true), GAME_CONFIG.MODAL_DELAY_MS);
   }, [stopLoop]);
@@ -184,7 +182,6 @@ export default function SniperZombieGame() {
 
   // 게임 상태 초기화
   const resetGameState = useCallback(() => {
-    setIsRunning(false);
     setShowModal(false);
     stopLoop();
   }, [stopLoop]);
@@ -205,9 +202,8 @@ export default function SniperZombieGame() {
   const handleScreenTap = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
       e.preventDefault();
-      if (gameState !== "playing" || !isRunning) return;
+      if (gameState !== "playing") return;
 
-      setIsRunning(false);
       stopLoop();
 
       const newState: GameState =
@@ -218,7 +214,7 @@ export default function SniperZombieGame() {
       setGameState(newState);
       setTimeout(() => setShowModal(true), GAME_CONFIG.MODAL_DELAY_MS);
     },
-    [gameState, isRunning, stopLoop, targetZombiePosition, bulletPosition]
+    [gameState, stopLoop, targetZombiePosition, bulletPosition]
   );
 
   const handleRetry = useCallback(() => {
@@ -233,7 +229,6 @@ export default function SniperZombieGame() {
 
     const timer = setTimeout(() => {
       setGameState("playing");
-      setIsRunning(true);
       lastTimeRef.current = null;
       if (rafRef.current == null) {
         rafRef.current = requestAnimationFrame(loopRef.current);
