@@ -146,9 +146,6 @@ export default function SniperZombieGame() {
       const next = bulletRef.current + decay;
       bulletRef.current = next;
 
-      // 매 프레임마다 배경 위치 업데이트 (정확한 위치 반영)
-      setBackgroundTranslateX(-bulletRef.current);
-
       // 33ms마다 state 업데이트 렌더링 throttle 30fps
       if (
         lastUpdateTimeRef.current === null ||
@@ -192,6 +189,9 @@ export default function SniperZombieGame() {
       }
 
       const newPosition = updateBulletPosition(deltaTime, currentTime);
+
+      // 매 프레임마다 배경 위치 업데이트 (정확한 위치 반영)
+      setBackgroundTranslateX(-bulletRef.current);
 
       if (checkGameOver(newPosition)) {
         return;
