@@ -11,7 +11,6 @@ import TargetZombie from "@/components/TargetZombie";
 import Shoot from "@/components/Shoot";
 import Distance from "@/components/Distance";
 import Citizen from "@/components/Citizen";
-
 // 게임 상수
 const METRIC = {
   BG_WIDTH: 7000,
@@ -67,6 +66,7 @@ export default function SniperZombieGame() {
   const bulletRef = useRef(GAME_CONFIG.START_VALUE);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number | null>(null); // 마지막 state 업데이트 시간
   const loopRef = useRef<(currentTime: number) => void>(() => {});
 
   // 뷰포트 크기 측정
@@ -138,13 +138,25 @@ export default function SniperZombieGame() {
   }, []);
 
   // 이동 계산
-  const updateBulletPosition = useCallback((deltaTime: number): number => {
-    const decay = GAME_CONFIG.DECAY_PER_SEC * deltaTime;
-    const next = bulletRef.current + decay;
-    bulletRef.current = next;
-    setBulletPosition(next);
-    return next;
-  }, []);
+  const updateBulletPosition = useCallback(
+    (deltaTime: number, currentTime: number): number => {
+      const decay = GAME_CONFIG.DECAY_PER_SEC * deltaTime;
+      const next = bulletRef.current + decay;
+      bulletRef.current = next;
+
+      // 100ms마다만 state 업데이트 렌더링 throttle
+      if (
+        lastUpdateTimeRef.current === null ||
+        currentTime - lastUpdateTimeRef.current >= 100
+      ) {
+        setBulletPosition(next);
+        lastUpdateTimeRef.current = currentTime;
+      }
+
+      return next;
+    },
+    []
+  );
 
   // 실패 판정
   const checkGameOver = useCallback(
@@ -174,7 +186,7 @@ export default function SniperZombieGame() {
         return;
       }
 
-      const newPosition = updateBulletPosition(deltaTime);
+      const newPosition = updateBulletPosition(deltaTime, currentTime);
 
       if (checkGameOver(newPosition)) {
         return;
@@ -199,6 +211,7 @@ export default function SniperZombieGame() {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
     bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
+    lastUpdateTimeRef.current = null; // 다음 프레임에서 초기화
   }, []);
 
   const handleGameStart = useCallback(() => {
