@@ -1,16 +1,11 @@
 "use client";
-import React, {
-  useRef,
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-} from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import Modal from "@/components/Modal";
 import TargetZombie from "@/components/TargetZombie";
 import Shoot from "@/components/Shoot";
 import Distance from "@/components/Distance";
 import Citizen from "@/components/Citizen";
+import AccuracyTextDisplay from "@/components/AccuracyTextDisplay";
 // 게임 상수
 const METRIC = {
   BG_WIDTH: 7000,
@@ -29,7 +24,7 @@ const GAME_CONFIG = {
   FINISH_LINE_MIN: 2000,
   FINISH_LINE_MAX: 4500,
   START_DELAY_MS: 800,
-  MODAL_DELAY_MS: 500,
+  MODAL_DELAY_MS: 1000,
 };
 
 // 배경 이미지 스타일
@@ -61,6 +56,9 @@ export default function SniperZombieGame() {
     GAME_CONFIG.FINISH_LINE_MIN
   );
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [backgroundTranslateX, setBackgroundTranslateX] = useState(0);
+  const [accuracyText, setAccuracyText] = useState<string | null>(null);
+  const [showPopcornEffect, setShowPopcornEffect] = useState(false);
 
   // Refs
   const bulletRef = useRef(GAME_CONFIG.START_VALUE);
@@ -144,12 +142,15 @@ export default function SniperZombieGame() {
       const next = bulletRef.current + decay;
       bulletRef.current = next;
 
-      // 100ms마다만 state 업데이트 렌더링 throttle
+      // 매 프레임마다 배경 위치 업데이트 (정확한 위치 반영)
+      setBackgroundTranslateX(-bulletRef.current);
+
+      // 33ms마다 state 업데이트 렌더링 throttle 30fps
       if (
         lastUpdateTimeRef.current === null ||
-        currentTime - lastUpdateTimeRef.current >= 100
+        currentTime - lastUpdateTimeRef.current >= 33
       ) {
-        setBulletPosition(next);
+        setBulletPosition(bulletRef.current);
         lastUpdateTimeRef.current = currentTime;
       }
 
@@ -211,6 +212,9 @@ export default function SniperZombieGame() {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
     bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
+    setBackgroundTranslateX(-GAME_CONFIG.START_VALUE);
+    setAccuracyText(null);
+    setShowPopcornEffect(false);
     lastUpdateTimeRef.current = null; // 다음 프레임에서 초기화
   }, []);
 
@@ -226,14 +230,34 @@ export default function SniperZombieGame() {
       e.preventDefault();
       if (gameState !== "playing") return;
 
+      // bulletRef.current를 사용하여 정확한 현재 위치로 판정
+      const currentBulletPosition = bulletRef.current;
+      const distance = Math.abs(currentBulletPosition - targetZombiePosition);
+
       const result: "success" | "failed" =
-        bulletPosition <= targetZombiePosition &&
-        bulletPosition >= targetZombiePosition - TARGET_WIDTH / 2
+        currentBulletPosition <= targetZombiePosition &&
+        currentBulletPosition >= targetZombiePosition - TARGET_WIDTH / 2
           ? "success"
           : "failed";
+
+      // 정확도 텍스트 및 이펙트 결정
+      if (result === "failed") {
+        setAccuracyText("BAD");
+        setShowPopcornEffect(false);
+      } else if (distance <= 30) {
+        setAccuracyText("EXCELLENT");
+        setShowPopcornEffect(true);
+      } else if (distance <= 70) {
+        setAccuracyText("GOOD");
+        setShowPopcornEffect(false);
+      } else {
+        setAccuracyText("BAD");
+        setShowPopcornEffect(false);
+      }
+
       endGame(result);
     },
-    [gameState, endGame, targetZombiePosition, bulletPosition]
+    [gameState, endGame, targetZombiePosition]
   );
 
   const handleRetry = useCallback(() => {
@@ -257,8 +281,7 @@ export default function SniperZombieGame() {
     return () => clearTimeout(timer);
   }, [gameState]);
 
-  // 백그라운드 X 오프셋 계산
-  const backgroundTranslateX = useMemo(() => -bulletPosition, [bulletPosition]);
+  // 백그라운드 X 오프셋은 updateBulletPosition에서 매 프레임마다 업데이트됨
 
   return (
     <>
@@ -291,6 +314,16 @@ export default function SniperZombieGame() {
           height={TARGET_HEIGHT}
           width={TARGET_WIDTH}
         />
+
+        {/* 정확도 텍스트 (좀비 머리 위에 표시) */}
+        {accuracyText &&
+          (gameState === "success" || gameState === "failed") && (
+            <AccuracyTextDisplay
+              text={accuracyText}
+              bulletPosition={bulletPosition}
+            />
+          )}
+
         {/* 총알 위치 (배경 기준 위치 고정) */}
         {/* 시민 위치 (가로 진행 기준) - 실패 시에만 표시 */}
         {gameState === "failed" && (

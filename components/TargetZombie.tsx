@@ -31,9 +31,7 @@ function TargetZombie({
         alt="zombie-state"
         width={width}
         height={height}
-        className={`w-full h-full object-contain ${
-          isSuccess ? "rotate-[18deg]" : ""
-        }`}
+        className={`w-full h-full object-contain `}
         priority
       />
 
