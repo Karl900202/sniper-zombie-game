@@ -21,13 +21,11 @@ function AccuracyChar({
 
   const springProps = useSpring({
     from: {
-      fontSize: "2.25rem",
       opacity: 0,
       scale: 0,
       transform: `translateY(${translateY + 20}px) scale(0)`,
     },
     to: {
-      fontSize: "2.25rem",
       opacity: 1,
       scale: 1,
       transform: `translateY(${translateY}px) scale(1)`,
@@ -40,6 +38,7 @@ function AccuracyChar({
     <animated.span
       style={{
         ...springProps,
+        fontSize: "2.25rem",
         display: "inline-block",
         color: color,
         textShadow: "3px 3px 6px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1)",

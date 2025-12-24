@@ -7,7 +7,7 @@ interface DistanceProps {
 function Distance({ value }: DistanceProps) {
   return (
     <div className="fixed left-1/2 -translate-x-1/2 top-[calc(50%-50px)] z-10 pointer-events-none">
-      <div className="flex-column items-center justify-center gap-2">
+      <div className="flex flex-col items-center justify-center gap-2">
         <h1 className="text-black text-xl font-bold drop-shadow-lg whitespace-nowrap text-center pb-2">
           {value.toFixed(0)}m
         </h1>

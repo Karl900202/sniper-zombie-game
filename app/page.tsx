@@ -58,7 +58,6 @@ export default function SniperZombieGame() {
   const [viewportHeight, setViewportHeight] = useState(0);
   const [backgroundTranslateX, setBackgroundTranslateX] = useState(0);
   const [accuracyText, setAccuracyText] = useState<string | null>(null);
-  const [showPopcornEffect, setShowPopcornEffect] = useState(false);
 
   // Refs
   const bulletRef = useRef(GAME_CONFIG.START_VALUE);
@@ -79,7 +78,7 @@ export default function SniperZombieGame() {
     };
   }, []);
 
-  // 타겟 좀비 위치 초기화 (hydration mismatch 방지)
+  // 타겟 좀비 위치 초기화
   const initTargetZombiePosition = useCallback(() => {
     if (
       targetZombiePosition === GAME_CONFIG.FINISH_LINE_MIN &&
@@ -113,6 +112,11 @@ export default function SniperZombieGame() {
       rafRef.current = null;
     }
   }, []);
+
+  // 컴포넌트 언마운트 시 cleanup
+  useEffect(() => {
+    return () => stopLoop();
+  }, [stopLoop]);
 
   // 게임 종료 (성공/실패 공통 로직)
   const endGame = useCallback(
@@ -202,27 +206,36 @@ export default function SniperZombieGame() {
     loopRef.current = loop;
   }, [loop]);
 
-  // 게임 상태 초기화
-  const resetGameState = useCallback(() => {
+  // 게임 초기화 (상태 리셋 + 게임 데이터 초기화)
+  const resetAndInitializeGame = useCallback(() => {
     setShowModal(false);
     stopLoop();
-  }, [stopLoop]);
-
-  const initializeGame = useCallback(() => {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
     bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
     setBackgroundTranslateX(-GAME_CONFIG.START_VALUE);
     setAccuracyText(null);
-    setShowPopcornEffect(false);
-    lastUpdateTimeRef.current = null; // 다음 프레임에서 초기화
-  }, []);
+    lastUpdateTimeRef.current = null;
+  }, [stopLoop]);
 
   const handleGameStart = useCallback(() => {
-    resetGameState();
-    initializeGame();
+    resetAndInitializeGame();
     setGameState("starting");
-  }, [resetGameState, initializeGame]);
+  }, [resetAndInitializeGame]);
+
+  // 정확도 텍스트 결정
+  const determineAccuracyText = useCallback(
+    (distance: number, result: "success" | "failed"): string => {
+      if (result === "failed" || distance > 70) {
+        return "BAD";
+      } else if (distance <= 30) {
+        return "EXCELLENT";
+      } else {
+        return "GOOD";
+      }
+    },
+    []
+  );
 
   // 화면 탭 시 게임 종료 및 결과 판정
   const handleScreenTap = useCallback(
@@ -230,7 +243,6 @@ export default function SniperZombieGame() {
       e.preventDefault();
       if (gameState !== "playing") return;
 
-      // bulletRef.current를 사용하여 정확한 현재 위치로 판정
       const currentBulletPosition = bulletRef.current;
       const distance = Math.abs(currentBulletPosition - targetZombiePosition);
 
@@ -240,31 +252,16 @@ export default function SniperZombieGame() {
           ? "success"
           : "failed";
 
-      // 정확도 텍스트 및 이펙트 결정
-      if (result === "failed") {
-        setAccuracyText("BAD");
-        setShowPopcornEffect(false);
-      } else if (distance <= 30) {
-        setAccuracyText("EXCELLENT");
-        setShowPopcornEffect(true);
-      } else if (distance <= 70) {
-        setAccuracyText("GOOD");
-        setShowPopcornEffect(false);
-      } else {
-        setAccuracyText("BAD");
-        setShowPopcornEffect(false);
-      }
-
+      setAccuracyText(determineAccuracyText(distance, result));
       endGame(result);
     },
-    [gameState, endGame, targetZombiePosition]
+    [gameState, endGame, targetZombiePosition, determineAccuracyText]
   );
 
   const handleRetry = useCallback(() => {
-    resetGameState();
-    initializeGame();
+    resetAndInitializeGame();
     setGameState("ready");
-  }, [resetGameState, initializeGame]);
+  }, [resetAndInitializeGame]);
 
   // 게임 시작 시 루프 시작
   useEffect(() => {
@@ -280,8 +277,6 @@ export default function SniperZombieGame() {
 
     return () => clearTimeout(timer);
   }, [gameState]);
-
-  // 백그라운드 X 오프셋은 updateBulletPosition에서 매 프레임마다 업데이트됨
 
   return (
     <>
@@ -324,7 +319,6 @@ export default function SniperZombieGame() {
             />
           )}
 
-        {/* 총알 위치 (배경 기준 위치 고정) */}
         {/* 시민 위치 (가로 진행 기준) - 실패 시에만 표시 */}
         {gameState === "failed" && (
           <Citizen
@@ -338,7 +332,6 @@ export default function SniperZombieGame() {
         <Shoot
           width={METRIC.GUN_WIDTH}
           height={METRIC.GUN_HEIGHT}
-          // gameState가 "starting"일 때만 시작 GIF 표시
           isStartAnimation={gameState === "starting"}
         />
       </div>

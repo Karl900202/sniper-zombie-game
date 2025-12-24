@@ -24,8 +24,8 @@ function Citizen({ locationX, gameState, height, width }: CitizenProps) {
       <Image
         src={citizenState}
         alt="citizenState"
-        width={height}
-        height={width}
+        width={width}
+        height={height}
         className="w-full h-full object-contain"
         priority
       />

@@ -17,7 +17,7 @@ function TargetZombie({
 }: TargetZombieProps) {
   const zombieState =
     gameState === "success" ? "/zombie-explosion.png" : "/target-zombie.png";
-  const isSuccess = gameState === "success";
+
   return (
     <div
       className="absolute top-[52vh] -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none w-[150px] h-[150px]"
