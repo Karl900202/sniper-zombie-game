@@ -34,15 +34,6 @@ function TargetZombie({
         className={`w-full h-full object-contain `}
         priority
       />
-
-      {/* <Image
-        className="absolute top-[36px] left-[42px]"
-        src={"/explosion.png"}
-        alt="zombie-explosion"
-        width={42}
-        height={42}
-        priority
-      /> */}
     </div>
   );
 }

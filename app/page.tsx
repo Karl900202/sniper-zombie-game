@@ -27,13 +27,6 @@ const GAME_CONFIG = {
   MODAL_DELAY_MS: 1000,
 };
 
-// 배경 이미지 스타일
-const BACKGROUND_STYLE = {
-  backgroundImage: "url('/background.png')",
-  backgroundSize: "auto 100%",
-  backgroundRepeat: "repeat-x",
-  backgroundPosition: "left center",
-} as const;
 
 type GameState = "ready" | "starting" | "playing" | "success" | "failed";
 
@@ -56,11 +49,11 @@ export default function SniperZombieGame() {
     GAME_CONFIG.FINISH_LINE_MIN
   );
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [backgroundTranslateX, setBackgroundTranslateX] = useState(0);
   const [accuracyText, setAccuracyText] = useState<string | null>(null);
 
   // Refs
   const bulletRef = useRef(GAME_CONFIG.START_VALUE);
-  const backgroundRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number | null>(null);
   const lastUpdateTimeRef = useRef<number | null>(null); // 마지막 state 업데이트 시간
@@ -166,9 +159,6 @@ export default function SniperZombieGame() {
       if (position >= GAME_CONFIG.AUTO_FAIL_METERS) {
         bulletRef.current = GAME_CONFIG.AUTO_FAIL_METERS;
         setBulletPosition(GAME_CONFIG.AUTO_FAIL_METERS);
-        if (backgroundRef.current) {
-          backgroundRef.current.style.transform = `translateX(${-GAME_CONFIG.AUTO_FAIL_METERS}px)`;
-        }
         endGame("failed");
         return true;
       }
@@ -193,10 +183,8 @@ export default function SniperZombieGame() {
 
       const newPosition = updateBulletPosition(deltaTime, currentTime);
 
-      // 매 프레임마다 배경 위치 업데이트 (DOM 직접 조작으로 리페인팅만 발생)
-      if (backgroundRef.current) {
-        backgroundRef.current.style.transform = `translateX(${-bulletRef.current}px)`;
-      }
+      // 매 프레임마다 배경 위치 업데이트 (정확한 위치 반영)
+      setBackgroundTranslateX(-bulletRef.current);
 
       if (checkGameOver(newPosition)) {
         return;
@@ -218,9 +206,7 @@ export default function SniperZombieGame() {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
     bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
-    if (backgroundRef.current) {
-      backgroundRef.current.style.transform = `translateX(${-GAME_CONFIG.START_VALUE}px)`;
-    }
+    setBackgroundTranslateX(-GAME_CONFIG.START_VALUE);
     setAccuracyText(null);
     lastUpdateTimeRef.current = null;
   }, [stopLoop]);
@@ -288,26 +274,31 @@ export default function SniperZombieGame() {
   return (
     <>
       <div
-        ref={backgroundRef}
         className=" w-full no-select overflow-hidden touch-none select-none will-change-transform"
         style={{
           width: `${METRIC.BG_WIDTH}px`,
           height: viewportHeight ? `${viewportHeight}px` : "100vh",
-          transform: `translateX(${-GAME_CONFIG.START_VALUE}px)`,
+          transform: `translateX(${backgroundTranslateX}px)`,
         }}
         onContextMenu={(e) => e.preventDefault()}
         onPointerDown={handleScreenTap}
       >
         {/* 배경 레이어 1 */}
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={BACKGROUND_STYLE}
+          className="absolute inset-0 pointer-events-none bg-[url('/background.png')] bg-repeat-x"
+          style={{
+            backgroundSize: "auto 100%",
+            backgroundPosition: "left center",
+          }}
         />
 
         {/* 배경 레이어 2 (오버레이) */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-40 z-[1]"
-          style={BACKGROUND_STYLE}
+          className="absolute inset-0 pointer-events-none opacity-40 z-[1] bg-[url('/background.png')] bg-repeat-x"
+          style={{
+            backgroundSize: "auto 100%",
+            backgroundPosition: "left center",
+          }}
         />
 
         {/* 타겟좀비 위치 (가로 진행 기준) */}

@@ -36,14 +36,10 @@ function AccuracyChar({
 
   return (
     <animated.span
+      className="text-4xl inline-block font-black mr-0.5 [text-shadow:3px_3px_6px_rgba(0,0,0,1),-1px_-1px_2px_rgba(0,0,0,1)]"
       style={{
         ...springProps,
-        fontSize: "2.25rem",
-        display: "inline-block",
         color: color,
-        textShadow: "3px 3px 6px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1)",
-        fontWeight: "900",
-        marginRight: "2px",
       }}
     >
       {char === " " ? "\u00A0" : char}
@@ -64,14 +60,9 @@ export default function AccuracyTextDisplay({
 
   return (
     <div
-      className="absolute pointer-events-none z-[100] font-bold"
+      className="absolute pointer-events-none z-[100] font-bold top-[30%] -translate-x-1/2 -translate-y-1/2 whitespace-nowrap inline-flex items-end"
       style={{
         left: `calc(50vw + ${bulletPosition}px)`,
-        top: "30%",
-        transform: "translate(-50%, -50%)",
-        whiteSpace: "nowrap",
-        display: "inline-flex",
-        alignItems: "flex-end",
       }}
     >
       {text.split("").map((char, index) => (
