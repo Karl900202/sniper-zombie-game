@@ -5,6 +5,7 @@ import TargetZombie from "@/components/TargetZombie";
 import Shoot from "@/components/Shoot";
 import Distance from "@/components/Distance";
 import Citizen from "@/components/Citizen";
+import HoldHint from "@/components/HoldHint";
 import AccuracyTextDisplay from "@/components/AccuracyTextDisplay";
 // 게임 상수
 const METRIC = {
@@ -26,7 +27,6 @@ const GAME_CONFIG = {
   START_DELAY_MS: 800,
   MODAL_DELAY_MS: 1000,
 };
-
 
 type GameState = "ready" | "starting" | "playing" | "success" | "failed";
 
@@ -339,6 +339,9 @@ export default function SniperZombieGame() {
       {(gameState === "playing" ||
         gameState === "success" ||
         gameState === "failed") && <Distance value={bulletPosition} />}
+
+      {/* 터치 힌트 (게임 진행 중에만 표시) */}
+      <HoldHint show={gameState === "playing"} />
 
       {/* 게임 시작 버튼 */}
       {gameState === "ready" && (

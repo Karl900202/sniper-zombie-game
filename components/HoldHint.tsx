@@ -12,17 +12,17 @@ function HoldHint({ show }: HoldHintProps) {
 
   return (
     <div
-      className="fixed z-10 -translate-x-1/2 -translate-y-1/2 top-[75vh] pointer-events-none"
+      className="fixed z-50 -translate-x-1/2 -translate-y-1/2 top-[75vh] pointer-events-none"
       style={{
-        left: "calc(50% + min(120px, (100vw - 480px) / 2 + 120px))",
+        left: "calc(65% + min(120px, (100vw - 480px) / 2 + 120px))",
       }}
     >
       <Image
-        src="/click-please.png"
-        alt="꾹 눌러주세요"
-        width={100}
-        height={100}
-        className="w-[100px] h-[100px] min-w-[75px] min-h-[75px]"
+        src="/touch-screen.png"
+        alt="touch-screen"
+        width={150}
+        height={150}
+        className="w-[150px] h-[150px] min-w-[75px] min-h-[75px]"
         unoptimized
       />
     </div>
