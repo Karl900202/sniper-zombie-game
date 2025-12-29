@@ -32,8 +32,8 @@ const GAME_CONFIG = {
   START_DELAY_MS: 800,
   MODAL_DELAY_MS: 1000,
 };
-
-type GameState = "ready" | "starting" | "playing" | "success" | "failed";
+type GameResult = "success" | "failed";
+type GameState = "ready" | "starting" | "playing" | GameResult;
 
 // 랜덤 위치 생성 함수
 const generateRandomTargetZombiePosition = (): number => {
@@ -115,7 +115,7 @@ export default function SniperZombieGame() {
 
   // 게임 종료 (성공/실패 공통 로직)
   const endGame = useCallback(
-    (result: "success" | "failed") => {
+    (result: GameResult) => {
       stopLoop();
       setGameState(result);
       setTimeout(() => setShowModal(true), GAME_CONFIG.MODAL_DELAY_MS);
@@ -227,7 +227,7 @@ export default function SniperZombieGame() {
 
   // 정확도 텍스트 결정
   const determineAccuracyText = useCallback(
-    (distance: number, result: "success" | "failed"): string => {
+    (distance: number, result: GameResult): string => {
       if (result === "failed" || distance > ACCURACY_THRESHOLDS.GOOD) {
         return "BAD";
       } else if (distance <= ACCURACY_THRESHOLDS.EXCELLENT) {
@@ -248,7 +248,7 @@ export default function SniperZombieGame() {
       const currentBulletPosition = bulletRef.current;
       const distance = Math.abs(currentBulletPosition - targetZombiePosition);
 
-      const result: "success" | "failed" =
+      const result: GameResult =
         currentBulletPosition <= targetZombiePosition &&
         currentBulletPosition >= targetZombiePosition - TARGET_WIDTH / 2
           ? "success"
