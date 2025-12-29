@@ -14,6 +14,11 @@ const METRIC = {
   GUN_HEIGHT: 130,
 } as const;
 
+const ACCURACY_THRESHOLDS = {
+  EXCELLENT: 30,
+  GOOD: 70,
+} as const;
+
 const TARGET_WIDTH = 150;
 const TARGET_HEIGHT = 150;
 
@@ -223,9 +228,9 @@ export default function SniperZombieGame() {
   // 정확도 텍스트 결정
   const determineAccuracyText = useCallback(
     (distance: number, result: "success" | "failed"): string => {
-      if (result === "failed" || distance > 70) {
+      if (result === "failed" || distance > ACCURACY_THRESHOLDS.GOOD) {
         return "BAD";
-      } else if (distance <= 30) {
+      } else if (distance <= ACCURACY_THRESHOLDS.EXCELLENT) {
         return "EXCELLENT";
       } else {
         return "GOOD";
