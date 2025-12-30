@@ -301,15 +301,6 @@ export default function SniperZombieGame() {
           }}
         />
 
-        {/* 배경 레이어 2 (오버레이) */}
-        <div
-          className="absolute inset-0 pointer-events-none opacity-40 z-[1] bg-[url('/background.png')] bg-repeat-x"
-          style={{
-            backgroundSize: "auto 100%",
-            backgroundPosition: "left center",
-          }}
-        />
-
         {/* 타겟좀비 위치 (가로 진행 기준) */}
         <TargetZombie
           locationX={targetZombiePosition}
