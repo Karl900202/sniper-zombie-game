@@ -307,6 +307,7 @@ export default function SniperZombieGame() {
           gameState={gameState}
           height={TARGET_HEIGHT}
           width={TARGET_WIDTH}
+          viewportHeight={viewportHeight}
         />
 
         {/* 정확도 텍스트 (좀비 머리 위에 표시) */}
@@ -325,6 +326,7 @@ export default function SniperZombieGame() {
             gameState={gameState}
             height={TARGET_HEIGHT}
             width={TARGET_WIDTH}
+            viewportHeight={viewportHeight}
           />
         )}
 
