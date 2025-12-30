@@ -93,11 +93,16 @@ export default function SniperZombieGame() {
     }, 0);
   }, []); // 마운트 시 한 번만 실행
 
+  // 배경 transform 업데이트 헬퍼 함수
+  const updateBackgroundTransform = (value: number) => {
+    if (backgroundRef.current) {
+      backgroundRef.current.style.transform = `translateX(${-value}px)`;
+    }
+  };
+
   // 초기 배경 위치 설정
   useEffect(() => {
-    if (backgroundRef.current) {
-      backgroundRef.current.style.transform = `translateX(${-GAME_CONFIG.START_VALUE}px)`;
-    }
+    updateBackgroundTransform(GAME_CONFIG.START_VALUE);
   }, []);
 
   // 게임 루프 제어
@@ -161,9 +166,7 @@ export default function SniperZombieGame() {
       if (position >= GAME_CONFIG.AUTO_FAIL_METERS) {
         bulletRef.current = GAME_CONFIG.AUTO_FAIL_METERS;
         setBulletPosition(GAME_CONFIG.AUTO_FAIL_METERS);
-        if (backgroundRef.current) {
-          backgroundRef.current.style.transform = `translateX(${-GAME_CONFIG.AUTO_FAIL_METERS}px)`;
-        }
+        updateBackgroundTransform(GAME_CONFIG.AUTO_FAIL_METERS);
         endGame("failed");
         return true;
       }
@@ -189,9 +192,7 @@ export default function SniperZombieGame() {
       const newPosition = updateBulletPosition(deltaTime, currentTime);
 
       // 매 프레임마다 배경 위치 업데이트 (DOM 직접 조작)
-      if (backgroundRef.current) {
-        backgroundRef.current.style.transform = `translateX(${-bulletRef.current}px)`;
-      }
+      updateBackgroundTransform(bulletRef.current);
 
       if (checkGameOver(newPosition)) {
         return;
@@ -213,9 +214,7 @@ export default function SniperZombieGame() {
     setTargetZombiePosition(generateRandomTargetZombiePosition());
     bulletRef.current = GAME_CONFIG.START_VALUE;
     setBulletPosition(GAME_CONFIG.START_VALUE);
-    if (backgroundRef.current) {
-      backgroundRef.current.style.transform = `translateX(${-GAME_CONFIG.START_VALUE}px)`;
-    }
+    updateBackgroundTransform(GAME_CONFIG.START_VALUE);
     setAccuracyText(null);
     lastUpdateTimeRef.current = null;
   }, [stopLoop]);
