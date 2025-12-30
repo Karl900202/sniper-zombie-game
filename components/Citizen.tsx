@@ -1,10 +1,11 @@
 import { memo } from "react";
 import Image from "next/image";
+import { GameState } from "@/app/page";
 
 interface CitizenProps {
   /** 시작 위치(픽셀 단위 거리) */
   locationX: number;
-  gameState: string;
+  gameState: GameState;
   height: number;
   width: number;
 }

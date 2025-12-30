@@ -32,8 +32,8 @@ const GAME_CONFIG = {
   START_DELAY_MS: 800,
   MODAL_DELAY_MS: 1000,
 };
-type GameResult = "success" | "failed";
-type GameState = "ready" | "starting" | "playing" | GameResult;
+export type GameResult = "success" | "failed";
+export type GameState = "ready" | "starting" | "playing" | GameResult;
 
 // 랜덤 위치 생성 함수
 const generateRandomTargetZombiePosition = (): number => {
