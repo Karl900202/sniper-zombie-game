@@ -21,7 +21,7 @@ function Modal({
 
   return (
     <div className="absolute inset-0 flex items-center justify-center z-40">
-      <div className="bg-white rounded-[50px] p-5 mx-2 max-w-sm w-full shadow-xl">
+      <div className="bg-white rounded-[50px] border-[2px] border-gray-300 p-5 mx-2 max-w-sm w-full shadow-xl">
         <h2 className="text-center text-2xl text-black font-bold mb-4">
           {title}
         </h2>

@@ -36,7 +36,7 @@ const GAME_CONFIG = {
   AUTO_FAIL_METERS: 5000,
   FINISH_LINE_MIN: 2000,
   FINISH_LINE_MAX: 4500,
-  START_DELAY_MS: 800,
+  START_DELAY_MS: 900,
   MODAL_DELAY_MS: 1000,
 };
 export type GameResult = "success" | "failed";
@@ -294,7 +294,7 @@ export default function SniperZombieGame() {
       >
         {/* 배경 레이어 1 */}
         <div
-          className="absolute inset-0 pointer-events-none bg-[url('/background.png')] bg-repeat-x"
+          className="absolute inset-0 pointer-events-none bg-[url('/background-white.png')] bg-repeat-x"
           style={{
             backgroundSize: "auto 100%",
             backgroundPosition: "left center",
@@ -334,6 +334,7 @@ export default function SniperZombieGame() {
           width={METRIC.GUN_WIDTH}
           height={METRIC.GUN_HEIGHT}
           isStartAnimation={gameState === "starting"}
+          viewportHeight={viewportHeight}
         />
       </div>
 
@@ -347,10 +348,10 @@ export default function SniperZombieGame() {
 
       {/* 게임 시작 버튼 */}
       {gameState === "ready" && (
-        <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 flex items-center justify-center z-30">
+        <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 flex items-center justify-center z-30">
           <button
             onClick={handleGameStart}
-            className="px-10 py-3 text-white rounded-full font-normal text-lg border-[3px] border-white shadow-md transition-colors bg-[#4F00FF]"
+            className="px-10 py-3 text-white rounded-xl font-normal text-lg border-[2px] border-white shadow-md transition-colors bg-black"
           >
             게임 시작
           </button>
