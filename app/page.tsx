@@ -8,6 +8,7 @@ import Citizen from "@/components/Citizen";
 import HoldHint from "@/components/HoldHint";
 import AccuracyTextDisplay from "@/components/AccuracyTextDisplay";
 // 게임 상수
+//브랜치
 const METRIC = {
   BG_WIDTH: 7000,
   GUN_WIDTH: 130,
