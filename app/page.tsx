@@ -37,7 +37,7 @@ const GAME_CONFIG = {
   FINISH_LINE_MIN: 2000,
   FINISH_LINE_MAX: 4500,
   START_DELAY_MS: 900,
-  MODAL_DELAY_MS: 1000,
+  MODAL_DELAY_MS: 1200,
 };
 export type GameResult = "success" | "failed";
 export type GameState = "ready" | "starting" | "playing" | GameResult;
