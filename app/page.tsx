@@ -83,7 +83,7 @@ export default function SniperZombieGame() {
       window.removeEventListener("orientationchange", updateViewport);
     };
   }, []);
-
+  console.log("CI/CD 테스트");
   // 클라이언트에서만 도착선 위치 랜덤 생성 (hydration mismatch 방지)
   useEffect(() => {
     if (typeof window === "undefined") return;
